@@ -28,7 +28,7 @@ async function handleCandidateLogin(event) {
       body: JSON.stringify({ email: identifier, password })
     });
 
-    const data = await response.json();
+    const text = await response.text(); let data; try { data = JSON.parse(text); } catch(e) { alert('SERVER ERROR REVEALED:\n\n' + text.substring(0, 250)); return; }
     if (response.ok) {
       localStorage.setItem('token', data.token);
       window.location.href = 'dashboard.html';
@@ -54,7 +54,7 @@ async function handleAdminLogin(event) {
       body: JSON.stringify({ email: 'admin@profiling.com', password })
     });
 
-    const data = await response.json();
+    const text = await response.text(); let data; try { data = JSON.parse(text); } catch(e) { alert('SERVER ERROR REVEALED:\n\n' + text.substring(0, 250)); return; }
     if (response.ok) {
       localStorage.setItem('token', data.token);
       window.location.href = 'admin-dashboard.html';
@@ -96,7 +96,7 @@ async function handleRegistration(event) {
       body: formData
     });
 
-    const data = await response.json();
+    const text = await response.text(); let data; try { data = JSON.parse(text); } catch(e) { alert('SERVER ERROR REVEALED:\n\n' + text.substring(0, 250)); return; }
     if (response.ok) {
       alert('Registration successful!');
       window.location.href = 'index.html';
