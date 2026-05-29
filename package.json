@@ -9,6 +9,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
+    "hono": "^4.12.23",
     "jsonwebtoken": "^9.0.3",
     "serverless-http": "^4.0.0"
   }
