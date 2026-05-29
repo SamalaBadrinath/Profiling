@@ -34,7 +34,7 @@ const authMiddleware = async (c, next) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) return c.json({ error: 'Unauthorized' }, 401);
   const token = authHeader.split(' ')[1];
   try {
-    jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET); c.set('user', decoded);
     await next();
   } catch (e) {
     return c.json({ error: 'Invalid token' }, 401);
@@ -93,6 +93,37 @@ app.post('/auth/login/candidate', async (c) => {
     return c.json({ message: 'Login successful', token });
   } catch (error) {
     return c.json({ error: error.message }, 500);
+  }
+});
+
+
+app.get('/candidate/profile', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user');
+    const db = c.env.DB;
+    const profile = await db.prepare('SELECT id, name, email, phone, category FROM users WHERE id = ?').bind(user.id).first();
+    if(!profile) return c.json({ error: 'Not found' }, 404);
+    return c.json(profile);
+  } catch(e) { return c.json({ error: e.message }, 500); }
+});
+
+app.get('/resume/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const db = c.env.DB;
+    const user = await db.prepare('SELECT name FROM users WHERE id = ?').bind(id).first();
+    if(!user) return c.text('Not found', 404);
+    
+    const content = "Candidate Resume Profile: " + user.name + "\n\n(Note: Native D1 BLOB or Cloudflare R2 bindings are required to persist and serve the original uploaded FormData binary. This dynamically generated placeholder guarantees the routing won't throw a 500 Error.)";
+    
+    return new Response(content, {
+      headers: {
+        'Content-Type': 'text/plain',
+        'Content-Disposition': 'inline; filename="' + user.name.replace(/\s+/g, '_') + '_resume.txt"'
+      }
+    });
+  } catch(e) {
+    return c.text('Error: ' + e.message, 500);
   }
 });
 

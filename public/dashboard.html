@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Candidate Dashboard - Profiling</title>
@@ -350,6 +353,60 @@
     </div>
   </div>
 
-<script src="/js/candidate.js"></script>
+
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) window.location.replace('index.html');
+
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+      if (!localStorage.getItem('token')) window.location.replace('index.html');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('logout-btn');
+    if(logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.replace('index.html');
+      });
+    }
+
+    fetch('/candidate/profile', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(res => {
+      if(res.status === 401 || res.status === 403) {
+        localStorage.removeItem('token');
+        window.location.replace('index.html');
+        throw new Error('Unauthorized');
+      }
+      return res.json();
+    })
+    .then(data => {
+       if(data.error) return;
+       const walkDOM = (node) => {
+         if(node.nodeType === 3) {
+           node.nodeValue = node.nodeValue
+             .replace(/\s*\[Jane Doe\]\s*/gi, data.name || 'N/A')
+             .replace(/\s*\[jane.doe@example.com\]\s*/gi, data.email || 'N/A')
+             .replace(/\s*\[\+1234567890\]\s*/gi, data.phone || 'N/A');
+         } else {
+           if(node.tagName === 'A' && (node.textContent.includes('View Resume') || node.textContent.includes('Resume'))) {
+             node.href = '/resume/' + data.id;
+             node.target = '_blank';
+           }
+           if(node.childNodes) {
+             node.childNodes.forEach(walkDOM);
+           }
+         }
+       };
+       walkDOM(document.body);
+    })
+    .catch(console.error);
+  });
+</script>
 </body>
+
 </html>
