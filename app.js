@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/cloudflare-workers';
 import bcrypt from 'bcryptjs';
@@ -60,19 +61,16 @@ app.post('/candidate/register', async (c) => {
     
     if (!email || !password) return c.json({ error: 'Email and password required' }, 400);
 
-    let resumeData = null;
+    let resumeB64 = null;
     let resumeType = null;
-    
-    // Cloudflare Worker specific file parsing
-    if (resume && typeof resume === 'object' && resume.arrayBuffer) {
-      resumeData = await resume.arrayBuffer();
+    if (resume && resume.arrayBuffer) {
+      const ab = await resume.arrayBuffer();
+      resumeB64 = Buffer.from(ab).toString('base64');
       resumeType = resume.type;
     }
 
     const db = c.env.DB;
-    
-    // Auto-migrate schema silently to support BLOB resumes
-    try { await db.prepare("ALTER TABLE users ADD COLUMN resume_data BLOB").run(); } catch(e) {}
+    try { await db.prepare("ALTER TABLE users ADD COLUMN resume_b64 TEXT").run(); } catch(e) {}
     try { await db.prepare("ALTER TABLE users ADD COLUMN resume_type TEXT").run(); } catch(e) {}
 
     const existing = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first();
@@ -80,9 +78,8 @@ app.post('/candidate/register', async (c) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const id = crypto.randomUUID();
-    
-    await db.prepare('INSERT INTO users (id, name, email, phone, category, password_hash, role, resume_data, resume_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .bind(id, name, email, phone, category, hashedPassword, 'candidate', resumeData, resumeType).run();
+    await db.prepare('INSERT INTO users (id, name, email, phone, category, password_hash, role, resume_b64, resume_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(id, name, email, phone, category, hashedPassword, 'candidate', resumeB64, resumeType).run();
 
     return c.json({ message: 'Registration successful' }, 200);
   } catch (error) {
@@ -124,19 +121,12 @@ app.get('/candidate/profile', authMiddleware, async (c) => {
 app.get('/resume/:id', async (c) => {
   try {
     const id = c.req.param('id');
-    const db = c.env.DB;
-    const user = await db.prepare('SELECT name, resume_data, resume_type FROM users WHERE id = ?').bind(id).first();
+    const user = await c.env.DB.prepare('SELECT name, resume_b64, resume_type FROM users WHERE id = ?').bind(id).first();
     
-    if(!user) return c.text('Not found', 404);
+    if(!user || !user.resume_b64) return c.text('No resume found', 404);
     
-    if (!user.resume_data) {
-      const content = "Candidate Resume Profile: " + user.name + "\n\nNo file was uploaded or the file was lost before the D1 BLOB migration was applied.";
-      return new Response(content, {
-        headers: { 'Content-Type': 'text/plain' }
-      });
-    }
-    
-    return new Response(user.resume_data, {
+    const fileBuffer = Buffer.from(user.resume_b64, 'base64');
+    return new Response(fileBuffer, {
       headers: {
         'Content-Type': user.resume_type || 'application/pdf',
         'Content-Disposition': 'inline; filename="' + user.name.replace(/\s+/g, '_') + '_resume"'
@@ -145,6 +135,25 @@ app.get('/resume/:id', async (c) => {
   } catch(e) {
     return c.text('Error: ' + e.message, 500);
   }
+});
+
+
+app.put('/candidate/profile', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user');
+    const body = await c.req.parseBody();
+    const { name, phone } = body;
+    await c.env.DB.prepare('UPDATE users SET name = ?, phone = ? WHERE id = ?').bind(name, phone, user.id).run();
+    return c.json({ message: 'Updated successfully' });
+  } catch (e) { return c.json({ error: e.message }, 500); }
+});
+
+app.delete('/candidate/profile', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user');
+    await c.env.DB.prepare('DELETE FROM users WHERE id = ?').bind(user.id).run();
+    return c.json({ message: 'Deleted successfully' });
+  } catch (e) { return c.json({ error: e.message }, 500); }
 });
 
 app.get('/*', serveStatic({ root: './' }));

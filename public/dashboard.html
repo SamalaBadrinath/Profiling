@@ -406,6 +406,56 @@
     })
     .catch(console.error);
   });
+
+  // UI Action Listeners
+  setTimeout(() => {
+    // Wire Edit Button
+    const editBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Edit'));
+    if (editBtn) {
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newName = prompt("Enter updated name:");
+        const newPhone = prompt("Enter updated phone number:");
+        if (newName && newPhone) {
+          const fd = new FormData();
+          fd.append('name', newName);
+          fd.append('phone', newPhone);
+          fetch('/candidate/profile', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }, body: fd })
+            .then(() => window.location.reload());
+        }
+      });
+    }
+
+    // Inject & Wire Delete Button
+    let deleteBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Delete'));
+    if (!deleteBtn) {
+      const container = document.querySelector('.island-admin-container') || document.body;
+      const btnHtml = '<div style="margin-top: 2rem; text-align: center;"><button id="delete-account-btn" style="background:#e11d48; color:white; border:none; padding:0.6rem 1.5rem; border-radius:8px; cursor:pointer; font-weight:600;">Delete Account</button></div>';
+      container.insertAdjacentHTML('beforeend', btnHtml);
+      deleteBtn = document.getElementById('delete-account-btn');
+    }
+    
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if(confirm("Warning: Are you sure you want to permanently delete your profile? This cannot be undone.")) {
+           fetch('/candidate/profile', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } })
+             .then(() => { localStorage.removeItem('token'); window.location.replace('index.html'); });
+        }
+      });
+    }
+
+    // Wire Logout Button
+    const logoutBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Logout'));
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        window.location.replace('index.html');
+      });
+    }
+  }, 500);
+
 </script>
 </body>
 
