@@ -37,6 +37,15 @@ const handler = serverless(app);
 // Cloudflare Worker Fetch handler entrypoint (ES Module format for Wrangler compatibility)
 export default {
   async fetch(request, env, ctx) {
-    return handler(request, { ...ctx, env });
+    const url = new URL(request.url);
+    const event = {
+      httpMethod: request.method,
+      path: url.pathname,
+      queryStringParameters: Object.fromEntries(url.searchParams),
+      headers: Object.fromEntries([...request.headers]),
+      body: ['POST', 'PUT', 'PATCH'].includes(request.method) ? await request.text() : null,
+      isBase64Encoded: false
+    };
+    return handler(event, { ...ctx, env });
   }
 };
