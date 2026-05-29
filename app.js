@@ -56,19 +56,33 @@ app.get('/admin/candidates', authMiddleware, async (c) => {
 app.post('/candidate/register', async (c) => {
   try {
     const body = await c.req.parseBody();
-    const { name, email, phone, category, password } = body;
+    const { name, email, phone, category, password, resume } = body;
     
     if (!email || !password) return c.json({ error: 'Email and password required' }, 400);
 
+    let resumeData = null;
+    let resumeType = null;
+    
+    // Cloudflare Worker specific file parsing
+    if (resume && typeof resume === 'object' && resume.arrayBuffer) {
+      resumeData = await resume.arrayBuffer();
+      resumeType = resume.type;
+    }
+
     const db = c.env.DB;
+    
+    // Auto-migrate schema silently to support BLOB resumes
+    try { await db.prepare("ALTER TABLE users ADD COLUMN resume_data BLOB").run(); } catch(e) {}
+    try { await db.prepare("ALTER TABLE users ADD COLUMN resume_type TEXT").run(); } catch(e) {}
+
     const existing = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first();
     if (existing) return c.json({ error: 'Email already exists' }, 400);
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const id = crypto.randomUUID();
     
-    await db.prepare('INSERT INTO users (id, name, email, phone, category, password_hash, role) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .bind(id, name, email, phone, category, hashedPassword, 'candidate').run();
+    await db.prepare('INSERT INTO users (id, name, email, phone, category, password_hash, role, resume_data, resume_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(id, name, email, phone, category, hashedPassword, 'candidate', resumeData, resumeType).run();
 
     return c.json({ message: 'Registration successful' }, 200);
   } catch (error) {
@@ -111,15 +125,21 @@ app.get('/resume/:id', async (c) => {
   try {
     const id = c.req.param('id');
     const db = c.env.DB;
-    const user = await db.prepare('SELECT name FROM users WHERE id = ?').bind(id).first();
+    const user = await db.prepare('SELECT name, resume_data, resume_type FROM users WHERE id = ?').bind(id).first();
+    
     if(!user) return c.text('Not found', 404);
     
-    const content = "Candidate Resume Profile: " + user.name + "\n\n(Note: Native D1 BLOB or Cloudflare R2 bindings are required to persist and serve the original uploaded FormData binary. This dynamically generated placeholder guarantees the routing won't throw a 500 Error.)";
+    if (!user.resume_data) {
+      const content = "Candidate Resume Profile: " + user.name + "\n\nNo file was uploaded or the file was lost before the D1 BLOB migration was applied.";
+      return new Response(content, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+    }
     
-    return new Response(content, {
+    return new Response(user.resume_data, {
       headers: {
-        'Content-Type': 'text/plain',
-        'Content-Disposition': 'inline; filename="' + user.name.replace(/\s+/g, '_') + '_resume.txt"'
+        'Content-Type': user.resume_type || 'application/pdf',
+        'Content-Disposition': 'inline; filename="' + user.name.replace(/\s+/g, '_') + '_resume"'
       }
     });
   } catch(e) {
