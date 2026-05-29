@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Profiling</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --th-bg: rgba(30, 41, 59, 0.8);
+      --tr-hover: rgba(30, 41, 59, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      position: relative;
+      padding: 3rem 2rem;
+    }
+
+    /* Subtle background glow */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(160px);
+      z-index: -1;
+      opacity: 0.15;
+      background: #6366f1;
+      top: -10%;
+      right: 10%;
+    }
+
+    .island-admin-dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      padding: 2.5rem;
+      animation: islandFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes islandFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .island-admin-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .island-table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .island-candidates-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    .island-candidates-table th {
+      background: var(--th-bg);
+      padding: 1rem 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .island-candidates-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .island-candidates-table tbody tr {
+      transition: background 0.2s;
+    }
+
+    .island-candidates-table tbody tr:hover {
+      background: var(--tr-hover);
+    }
+
+    .island-resume-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 0.8rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 6px;
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .island-resume-link:hover {
+      background: var(--accent-color);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="island-admin-dashboard">
+    <h1 class="island-admin-title">Candidate Directory</h1>
+
+    <div class="island-table-container">
+      <table class="island-candidates-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Resume</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>John Doe</td>
+            <td>john.doe@example.com</td>
+            <td>+1234567890</td>
+            <td><a href="#" class="island-resume-link">View File</a></td>
+            <td>Backend Developer</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Jane Smith</td>
+            <td>jane.smith@example.com</td>
+            <td>+1987654321</td>
+            <td><a href="#" class="island-resume-link">View File</a></td>
+            <td>UI/UX Designer</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</body>
+</html>

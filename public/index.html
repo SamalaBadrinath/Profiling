@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Login - Profiling</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --input-bg: rgba(15, 23, 42, 0.6);
+      --input-border: rgba(255, 255, 255, 0.1);
+      --input-focus: #818cf8;
+      --error-color: #f43f5e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient background glows */
+    body::before, body::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    body::before {
+      background: #4f46e5;
+      top: 15%;
+      left: 20%;
+    }
+
+    body::after {
+      background: #06b6d4;
+      bottom: 15%;
+      right: 20%;
+    }
+
+    .island-login-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 2.5rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: islandFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes islandFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .island-login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .island-login-header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .island-login-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .island-login-form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .island-login-form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .island-login-input {
+      width: 100%;
+      padding: 0.875rem 1.25rem;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .island-login-input:focus {
+      outline: none;
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .island-login-utilities {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+    }
+
+    .island-login-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .island-login-link:hover {
+      color: var(--text-primary);
+    }
+
+    .island-login-forgot-link {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .island-login-forgot-link:hover {
+      color: var(--input-focus);
+    }
+
+    .island-login-btn {
+      width: 100%;
+      padding: 0.875rem;
+      background: var(--accent-color);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .island-login-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .island-login-btn:active {
+      transform: translateY(0);
+    }
+
+    .island-login-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .island-login-register-link {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .island-login-register-link span {
+      color: var(--accent-color);
+      transition: color 0.2s;
+    }
+
+    .island-login-register-link:hover span {
+      color: var(--input-focus);
+    }
+
+    .island-login-admin-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      align-self: center;
+      transition: all 0.2s;
+    }
+
+    .island-login-admin-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="island-login-container">
+    <div class="island-login-header">
+      <h1>Welcome Back</h1>
+      <p>Enter your details to access your profile</p>
+    </div>
+
+    <form action="#" method="POST">
+      <div class="island-login-form-group">
+        <label for="identifier">Email / Phone</label>
+        <input type="text" id="identifier" name="identifier" class="island-login-input" placeholder="e.g. candidate@example.com" required>
+      </div>
+
+      <div class="island-login-form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="island-login-input" placeholder="••••••••" required>
+      </div>
+
+      <div class="island-login-utilities">
+        <a href="register.html" class="island-login-register-link">New? <span>Register here</span></a>
+        <a href="#" class="island-login-forgot-link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="island-login-btn">Login</button>
+    </form>
+
+    <div class="island-login-footer">
+      <a href="admin-login.html" class="island-login-admin-link">Access Admin Entrance</a>
+    </div>
+  </div>
+
+</body>
+</html>

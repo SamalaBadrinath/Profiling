@@ -1,0 +1,13 @@
+name = "profiling-app"
+main = "app.js"
+compatibility_date = "2026-05-29"
+compatibility_flags = [ "nodejs_compat" ]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "profiling-db"
+database_id = "bdde99a2-b416-448d-9c5b-627e7225015e"
+
+[assets]
+directory = "public"
+

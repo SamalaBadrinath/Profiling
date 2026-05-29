@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Profiling</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+      --card-bg: rgba(15, 23, 42, 0.8);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --text-primary: #f8fafc;
+      --text-secondary: #64748b;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --input-bg: rgba(2, 6, 23, 0.8);
+      --input-border: rgba(255, 255, 255, 0.08);
+      --input-focus: #818cf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-primary);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient background glows - extra deep and minimalist */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      filter: blur(150px);
+      z-index: -1;
+      opacity: 0.25;
+      background: #4f46e5;
+      top: 35%;
+      left: 40%;
+    }
+
+    .island-admin-container {
+      width: 100%;
+      max-width: 360px;
+      padding: 3rem 2.5rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      animation: islandFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes islandFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .island-admin-heading {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+    }
+
+    .island-admin-form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .island-admin-input {
+      width: 100%;
+      padding: 0.875rem 1.25rem;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .island-admin-input:focus {
+      outline: none;
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+      background: #020617;
+    }
+
+    .island-admin-btn {
+      width: 100%;
+      padding: 0.875rem;
+      background: var(--text-primary);
+      border: none;
+      border-radius: 10px;
+      color: #020617;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .island-admin-btn:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    .island-admin-btn:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="island-admin-container">
+    <h1 class="island-admin-heading">Admin</h1>
+
+    <form action="#" method="POST">
+      <div class="island-admin-form-group">
+        <input type="password" id="password" name="password" class="island-admin-input" placeholder="Password" required>
+      </div>
+
+      <button type="submit" class="island-admin-btn">Login</button>
+    </form>
+  </div>
+
+</body>
+</html>
