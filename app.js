@@ -50,6 +50,52 @@ app.get('/admin/candidates', authMiddleware, async (c) => {
   }
 });
 
+
+// --- RESTORED CANDIDATE ROUTES ---
+
+app.post('/candidate/register', async (c) => {
+  try {
+    const body = await c.req.parseBody();
+    const { name, email, phone, category, password } = body;
+    
+    if (!email || !password) return c.json({ error: 'Email and password required' }, 400);
+
+    const db = c.env.DB;
+    const existing = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first();
+    if (existing) return c.json({ error: 'Email already exists' }, 400);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const id = crypto.randomUUID();
+    
+    await db.prepare('INSERT INTO users (id, name, email, phone, category, password_hash, role) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .bind(id, name, email, phone, category, hashedPassword, 'candidate').run();
+
+    return c.json({ message: 'Registration successful' }, 200);
+  } catch (error) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+app.post('/auth/login/candidate', async (c) => {
+  try {
+    const { email, password } = await c.req.json();
+    if (!email || !password) return c.json({ error: 'Email and password required' }, 400);
+
+    const db = c.env.DB;
+    const user = await db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first();
+
+    if (!user || user.role !== 'candidate') return c.json({ error: 'Invalid login' }, 401);
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) return c.json({ error: 'Invalid login' }, 401);
+
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+    return c.json({ message: 'Login successful', token });
+  } catch (error) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 app.get('/*', serveStatic({ root: './' }));
 
 export default app;
