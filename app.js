@@ -15,8 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware to inject Cloudflare Env into request
 app.use((req, res, next) => {
   req.env = req.env || {};
-  if (req.apiGateway && req.apiGateway.event) {
-    req.env = req.apiGateway.event.env || {};
+  if (req.apiGateway && req.apiGateway.context) {
+    req.env = req.apiGateway.context.env || {};
   }
   next();
 });
