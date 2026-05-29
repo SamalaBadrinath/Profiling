@@ -28,6 +28,28 @@ app.post('/auth/login/admin', async (c) => {
   }
 });
 
+
+const authMiddleware = async (c, next) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return c.json({ error: 'Unauthorized' }, 401);
+  const token = authHeader.split(' ')[1];
+  try {
+    jwt.verify(token, JWT_SECRET);
+    await next();
+  } catch (e) {
+    return c.json({ error: 'Invalid token' }, 401);
+  }
+};
+
+app.get('/admin/candidates', authMiddleware, async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare("SELECT * FROM users WHERE role = 'candidate'").all();
+    return c.json({ candidates: results });
+  } catch(e) {
+    return c.json({ error: e.message }, 500);
+  }
+});
+
 app.get('/*', serveStatic({ root: './' }));
 
 export default app;

@@ -1,3 +1,11 @@
+
+if (window.location.pathname.includes('admin-login')) {
+  if (localStorage.getItem('token')) window.location.replace('admin-dashboard.html');
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted && localStorage.getItem('token')) window.location.replace('admin-dashboard.html');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const candidateLoginForm = document.querySelector('.island-login-container form');
   const adminLoginForm = document.querySelector('.island-admin-container form');
